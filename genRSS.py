@@ -104,7 +104,13 @@ def getFiles(dirname, extensions=None, recursive=False):
     allFiles = []
     if recursive:
         for root, dirs, filenames in os.walk(dirname):
-                for name in filenames:
+            # Ignore dirs like .ssh, .git, .svn, etc
+            dirs[:] = [d for d in dirs if not d[0] == '.']
+            filenames = [f for f in filenames if not f[0] == '.']
+            for name in filenames:
+                f, e = os.path.splitext(name)
+                print e
+                if (e.lower() == '.mp3'):
                     allFiles.append(os.path.join(root, name))
     else:
         allFiles = [f for f in glob.glob(dirname + "*") if os.path.isfile(f)]   
@@ -113,8 +119,9 @@ def getFiles(dirname, extensions=None, recursive=False):
         for ext in set([e.lower() for e in extensions]):
             selectedFiles += [n for n in allFiles if fnmatch.fnmatch(n.lower(), "*{0}".format(ext))]            
     else:
+        
         selectedFiles = allFiles
-    
+    print selectedFiles
     return sorted(set(selectedFiles))
 
 
@@ -285,8 +292,8 @@ def main(argv=None):
         
         # process options
         (opts, args) = parser.parse_args(argv)
-        
-                 
+
+
         if opts.dirname is None or opts.host is None:
             raise Exception("Usage: python %s -d directory -H hostname [-o output -r]\n   For more information run %s --help\n" % (program_name,program_name))
         
@@ -311,7 +318,6 @@ def main(argv=None):
                 link += opts.outfile
             else:
                 link += '/' + opts.outfile
-        
         if opts.title is not None:
             title = opts.title
             
